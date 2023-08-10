@@ -89,7 +89,7 @@ func main() {
 		})
 
 		api.GET("/upload/log/clear", func(c *gin.Context) {
-			filePath := "log.txt"
+			filePath := "log.json"
 
 			// 使用 Remove 函数删除文件
 			err := os.Remove(filePath)
