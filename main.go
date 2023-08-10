@@ -28,7 +28,7 @@ func main() {
 			currentTime := time.Now().Format("2006-01-02 15:04:05")
 
 			// 写入到本地文件
-			queryString := "\n---------------" + currentTime + ":" + c.Query("v")
+			queryString := "\n---------------" + currentTime + ":-------------\n" + c.Query("v")
 
 			writLog(queryString)
 
