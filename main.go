@@ -22,13 +22,6 @@ func main() {
 	// 创建一个路由
 	r := gin.Default()
 
-	// 设置 HTML 模板路径
-	r.LoadHTMLGlob("templates/*")
-
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
-	})
-
 	api := r.Group("/api")
 	{
 		api.GET("/upload/log", func(c *gin.Context) {
