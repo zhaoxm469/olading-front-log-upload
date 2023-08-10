@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +25,10 @@ func main() {
 	api := r.Group("/api")
 	{
 		api.GET("/upload/log", func(c *gin.Context) {
-			queryString := c.Query("v")
+			currentTime := time.Now().Format("2006-01-02 15:04:05")
+
+			// 写入到本地文件
+			queryString := "\n---------------" + currentTime + ":" + c.Query("v")
 
 			writLog(queryString)
 
