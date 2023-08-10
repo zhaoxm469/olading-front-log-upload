@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,13 +10,55 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func writLog(name string) {
-	file, err := os.OpenFile("./log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		fmt.Println("打开文件出错，err:", err)
-		return
+type Log struct {
+	Content     string `json:"content"`
+	CurrentTime string `json:"currentTime"`
+}
+
+func createOrUpdateJSONFile(filename string, data interface{}) error {
+
+	// 尝试打开已有的 JSON 文件以读取数据
+	file, err := os.OpenFile(filename, os.O_RDWR, 0644)
+	if err != nil && os.IsNotExist(err) {
+		// 如果文件不存在，则创建文件并初始化为一个空的 JSON 数组
+		file, err = os.Create(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		emptyData := []interface{}{}
+		encoder := json.NewEncoder(file)
+		err = encoder.Encode(emptyData)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
 	}
-	fmt.Fprintln(file, name)
+
+	defer file.Close()
+
+	// 解析已有的 JSON 数据
+	var existingData []interface{}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&existingData)
+	if err != nil {
+		return createOrUpdateJSONFile(filename, data)
+	}
+
+	// 将新的数据追加到切片中
+	existingData = append(existingData, data)
+
+	// 将更新后的数据重新写入文件
+	file.Seek(0, 0)
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(existingData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {
@@ -26,11 +69,20 @@ func main() {
 	{
 		api.GET("/upload/log", func(c *gin.Context) {
 			currentTime := time.Now().Format("2006-01-02 15:04:05")
+			queryString := c.Query("v")
+			filename := "log.json"
 
-			// 写入到本地文件
-			queryString := "\n---------------" + currentTime + ":-------------\n" + c.Query("v")
+			newLog := Log{
+				Content:     queryString,
+				CurrentTime: currentTime,
+			}
 
-			writLog(queryString)
+			err := createOrUpdateJSONFile(filename, newLog)
+			if err != nil {
+				c.String(http.StatusOK, "失败")
+				fmt.Println("Error:", err)
+				return
+			}
 
 			// 返回一个文本
 			c.String(http.StatusOK, "done")

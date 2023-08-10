@@ -1,34 +1,72 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-func main() {
-	// 向标准输出写入内容
-	// fmt.Fprintln(os.Stdout, "向标准输出写入内容")
-	// fileObj, err := os.OpenFile("./xx.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	// if err != nil {
-	// 	fmt.Println("打开文件出错，err:", err)
-	// 	return
-	// }
-	// // 向打开的文件句柄中写入内容
-	// fmt.Fprintln(fileObj, "往文件中写如信息")
-	// file, err := os.Open("./xx2.txt")
-	// if err != nil {
-	// 	fmt.Println("打开文件出错，err:", err)
-	// }
-	// file.Close()
+type Log struct {
+	Content string `json:"content"`
+}
 
-	name := 123
+func createOrUpdateJSONFile(filename string, data interface{}) error {
 
-	fileObj, err := os.OpenFile("./11.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		fmt.Println("打开文件出错，err:", err)
+	// 尝试打开已有的 JSON 文件以读取数据
+	file, err := os.OpenFile(filename, os.O_RDWR, 0644)
+	if err != nil && os.IsNotExist(err) {
+		// 如果文件不存在，则创建文件并初始化为一个空的 JSON 数组
+		file, err = os.Create(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		emptyData := []interface{}{}
+		encoder := json.NewEncoder(file)
+		err = encoder.Encode(emptyData)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
 	}
 
-	defer fileObj.Close()
+	defer file.Close()
 
-	fmt.Fprintf(fileObj, "往文件中写如信息：%v", name)
+	// 解析已有的 JSON 数据
+	var existingData []interface{}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&existingData)
+	if err != nil {
+		return createOrUpdateJSONFile(filename, data)
+	}
+
+	// 将新的数据追加到切片中
+	existingData = append(existingData, data)
+
+	// 将更新后的数据重新写入文件
+	file.Seek(0, 0)
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(existingData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
+	newLog := Log{
+		Content: "Alice",
+	}
+	filename := "log.json"
+
+	err := createOrUpdateJSONFile(filename, newLog)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	fmt.Println("Data appended to or created in", filename)
 }
