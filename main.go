@@ -1,7 +1,6 @@
 package main
 
 import (
-	"demo/pkg/util"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -64,8 +63,6 @@ func createOrUpdateJSONFile(filename string, data interface{}) error {
 
 func main() {
 
-	util.Print()
-	return
 	// 创建一个路由
 	r := gin.Default()
 
