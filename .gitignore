@@ -7,4 +7,4 @@ client_generated.js
 .http
 .DS_Store
 mock
-log.txt
+log.json
