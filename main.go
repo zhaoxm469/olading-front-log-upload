@@ -27,12 +27,7 @@ func main() {
 		api.GET("/upload/log", func(c *gin.Context) {
 			currentTime := time.Now().Format("2006-01-02 15:04:05")
 
-			fmt.Println(currentTime)
-			fmt.Println(currentTime)
-
-			// 写入到本地文件
 			queryString := currentTime + ":" + c.Query("v")
-			// requestTime := c.Request.URL
 
 			writLog(queryString)
 
