@@ -1,0 +1,19 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gin HTML Example</title>
+</head>
+<body>
+    <h1>Hello, Gin!</h1>
+    <p>This is a simple HTML page rendered by Gin.</p>
+    <button onclick="handleClick()">点击发送请求</button>
+</body>
+</html>
+<script>
+    window.handleClick = function(){
+        const Img = new Image();
+        Img.src = "/api/upload/log?name=张三&age=18";
+        console.log("123")
+    }
+</script>
