@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -85,8 +87,16 @@ func main() {
 				return
 			}
 
-			// 返回一个文本
-			c.String(http.StatusOK, "done")
+			pngFilePath := "./bitbug_favicon.ico" // 替换成你的 PNG 图片文件路径
+			pngData, err := ioutil.ReadFile(pngFilePath)
+			if err != nil {
+				c.String(http.StatusInternalServerError, "无法读取图片文件")
+				return
+			}
+			// 将 PNG 图片数据进行 base64 编码
+			pngBase64 := base64.StdEncoding.EncodeToString(pngData)
+			// 返回 base64 编码的 PNG 图片作为响应
+			c.Data(http.StatusOK, "image/png", []byte(pngBase64))
 		})
 
 		api.GET("/upload/log/clear", func(c *gin.Context) {
