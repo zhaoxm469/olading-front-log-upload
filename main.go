@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -63,6 +64,15 @@ func createOrUpdateJSONFile(filename string, data interface{}) error {
 	return nil
 }
 
+func contains(s string, arr []string) bool {
+	for _, a := range arr {
+		if strings.Contains(s, a) {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 
 	// 创建一个路由
@@ -80,11 +90,17 @@ func main() {
 				CurrentTime: currentTime,
 			}
 
-			err := createOrUpdateJSONFile(filename, newLog)
-			if err != nil {
-				c.String(http.StatusOK, "失败")
-				fmt.Println("Error:", err)
-				return
+			exclusions := []string{"/marketing/dict/bankList", "/marketing/merchant/orgTree"}
+
+			if contains(queryString, exclusions) {
+				fmt.Println("字符串包含数组内的字符")
+			} else {
+				err := createOrUpdateJSONFile(filename, newLog)
+				if err != nil {
+					c.String(http.StatusOK, "失败")
+					fmt.Println("Error:", err)
+					return
+				}
 			}
 
 			pngFilePath := "./bitbug_favicon.ico" // 替换成你的 PNG 图片文件路径
