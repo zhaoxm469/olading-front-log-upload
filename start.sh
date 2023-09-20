@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 停止项目
+pm2 delete go-olading-upload-log
+
 # 编译 Go 项目
 go build main.go
 
